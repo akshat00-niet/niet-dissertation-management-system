@@ -1,0 +1,42 @@
+-- Seed 004: Demo Academic Profiles & Research Domains
+-- Target: Local Development Database ONLY
+
+BEGIN;
+
+-- 1. Research Domains
+INSERT INTO research_domains (id, department_id, code, name, is_active) VALUES
+('d1000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'AI_ML', 'Artificial Intelligence & Machine Learning', TRUE),
+('d1000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 'CYBER_SEC', 'Cybersecurity & Cryptography', TRUE),
+('d1000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000002', 'VLSI_SYS', 'VLSI & Low-Power Embedded Systems', TRUE)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, is_active = EXCLUDED.is_active;
+
+-- 2. Student Profiles
+INSERT INTO student_profiles (user_id, roll_number, enrollment_number, program_id, department_id, batch_name, current_semester, is_eligible) VALUES
+('11111111-1111-1111-1111-111111111111', '25MTECHCSE001', 'EN2025MTCSE01', '30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '2025-2027', 3, TRUE),
+('22222222-2222-2222-2222-222222222222', '25MTECHECE001', 'EN2025MTECE01', '30000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', '2025-2027', 3, TRUE)
+ON CONFLICT (user_id) DO UPDATE SET roll_number = EXCLUDED.roll_number, is_eligible = EXCLUDED.is_eligible;
+
+-- 3. Faculty Profiles
+INSERT INTO faculty_profiles (user_id, employee_code, designation, department_id, active_guide_load, active_coguide_load, is_available) VALUES
+('33333333-3333-3333-3333-333333333333', 'EMP-CSE-001', 'Associate Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('44444444-4444-4444-4444-444444444444', 'EMP-ECE-001', 'Assistant Professor', '10000000-0000-0000-0000-000000000002', 0, 0, TRUE),
+('55555555-5555-5555-5555-555555555555', 'EMP-CSE-002', 'Associate Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('66666666-6666-6666-6666-666666666666', 'EMP-CSE-003', 'Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('66666666-eeee-6666-eeee-666666666666', 'EMP-ECE-002', 'Associate Professor', '10000000-0000-0000-0000-000000000002', 0, 0, TRUE),
+('77777777-7777-7777-7777-777777777777', 'EMP-CSE-004', 'Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('88888888-8888-8888-8888-888888888888', 'EMP-CSE-005', 'Professor & HOD', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('88888888-eeee-8888-eeee-888888888888', 'EMP-ECE-005', 'Professor & HOD', '10000000-0000-0000-0000-000000000002', 0, 0, TRUE),
+('99999999-9999-9999-9999-999999999999', 'EMP-CSE-006', 'Associate Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EMP-CSE-007', 'Associate Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('dddddddd-dddd-dddd-dddd-dddddddddddd', 'EMP-CSE-008', 'Assistant Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'EMP-CSE-009', 'Assistant Professor', '10000000-0000-0000-0000-000000000001', 0, 0, TRUE)
+ON CONFLICT (user_id) DO UPDATE SET designation = EXCLUDED.designation, is_available = EXCLUDED.is_available;
+
+-- 4. Faculty Expertise
+INSERT INTO faculty_expertise (faculty_id, domain_id, expertise_level) VALUES
+('33333333-3333-3333-3333-333333333333', 'd1000000-0000-0000-0000-000000000001', 'PRIMARY'),
+('44444444-4444-4444-4444-444444444444', 'd1000000-0000-0000-0000-000000000003', 'PRIMARY'),
+('55555555-5555-5555-5555-555555555555', 'd1000000-0000-0000-0000-000000000002', 'PRIMARY')
+ON CONFLICT (faculty_id, domain_id) DO NOTHING;
+
+COMMIT;
