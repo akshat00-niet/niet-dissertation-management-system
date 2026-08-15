@@ -402,19 +402,19 @@ All custom security helper functions must be declared with:
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                              CUSTOM RLS HELPER FUNCTIONS                               │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1. auth.jwt_dept_id() -> UUID                                                          │
+│ 1. public.jwt_dept_id() -> UUID                                                        │
 │    • Logic: Returns the active department_id from the user's active session role.      │
-│ 2. auth.has_role(VARIADIC text[]) -> BOOLEAN                                           │
+│ 2. public.has_role(VARIADIC text[]) -> BOOLEAN                                         │
 │    • Logic: Returns TRUE if auth.uid() possesses any of the listed active role IDs in  │
 │      user_role_assignments where is_active = TRUE.                                     │
-│ 3. auth.is_assigned_guide(thesis_id UUID) -> BOOLEAN                                   │
+│ 3. public.is_assigned_guide(thesis_id UUID) -> BOOLEAN                                 │
 │    • Logic: Returns TRUE if theses.guide_id = auth.uid() for the given thesis.         │
-│ 4. auth.is_assigned_coguide(thesis_id UUID) -> BOOLEAN                                 │
+│ 4. public.is_assigned_coguide(thesis_id UUID) -> BOOLEAN                               │
 │    • Logic: Returns TRUE if theses.co_guide_id = auth.uid() for the given thesis.      │
-│ 5. auth.is_assigned_panel_member(thesis_id UUID) -> BOOLEAN                            │
+│ 5. public.is_assigned_panel_member(thesis_id UUID) -> BOOLEAN                          │
 │    • Logic: Returns TRUE if auth.uid() is appointed in panel_member_assignments on an  │
 │      active defense_panel for the given thesis_id.                                     │
-│ 6. auth.is_active_dcec_chair(dept_id UUID) -> BOOLEAN                                  │
+│ 6. public.is_active_dcec_chair(dept_id UUID) -> BOOLEAN                                │
 │    • Logic: Returns TRUE if auth.uid() has active ROLE_HOD in dept_id OR holds an      │
 │      active, unrevoked dcec_delegations record for dept_id where clock_timestamp() is   │
 │      between effective_from and effective_until.                                       │
@@ -436,60 +436,60 @@ RLS POLICY LEGEND:
 
 | # | Table Name | SELECT Policy | INSERT Policy | UPDATE Policy | DELETE Policy | Storage Class |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | `departments` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 2 | `academic_sessions` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 3 | `programs` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 4 | `batches` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 5 | `sections` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 6 | `users` | `auth.uid() = id OR auth.has_role('ADMIN', 'HOD')` | `auth.has_role('ADMIN')` | `auth.uid() = id OR auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 7 | `roles` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Static Reference |
-| 8 | `permissions` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Static Reference |
-| 9 | `role_permissions` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | **DENIED** | `auth.has_role('ADMIN')` | Mutable (Admin) |
-| 10 | `user_role_assignments`| `auth.uid() = user_id OR auth.has_role('ADMIN', 'HOD')` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | Mutable (Admin) |
-| 11 | `student_profiles` | `auth.uid() = user_id OR auth.has_role('ADMIN', 'HOD', 'DC', 'DHOD', 'FACULTY')` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable |
-| 12 | `faculty_profiles` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.uid() = user_id OR auth.has_role('ADMIN')` | **DENIED** | Mutable |
-| 13 | `faculty_expertise` | `auth.uid() IS NOT NULL` | `auth.uid() = faculty_id OR auth.has_role('ADMIN')` | **DENIED** | `auth.uid() = faculty_id OR auth.has_role('ADMIN')` | Mutable |
-| 14 | `research_domains` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN', 'HOD')` | `auth.has_role('ADMIN', 'HOD')` | **DENIED** | Mutable (Admin) |
-| 15 | `theses` | `auth.uid() = student_id OR auth.is_assigned_guide(id) OR auth.is_assigned_coguide(id) OR (department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER')) OR auth.is_assigned_panel_member(id)` | `auth.has_role('STUDENT')` | Contextual State Machine Guards | **DENIED** | State-Controlled |
-| 16 | `thesis_titles` | Same as `theses` SELECT | `auth.has_role('STUDENT')` | Contextual Title Guards | **DENIED** | State-Controlled |
+| 1 | `departments` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 2 | `academic_sessions` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 3 | `programs` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 4 | `batches` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 5 | `sections` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 6 | `users` | `auth.uid() = id OR public.has_role('ADMIN', 'HOD')` | `public.has_role('ADMIN')` | `auth.uid() = id OR public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 7 | `roles` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Static Reference |
+| 8 | `permissions` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Static Reference |
+| 9 | `role_permissions` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | **DENIED** | `public.has_role('ADMIN')` | Mutable (Admin) |
+| 10 | `user_role_assignments`| `auth.uid() = user_id OR public.has_role('ADMIN', 'HOD')` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | Mutable (Admin) |
+| 11 | `student_profiles` | `auth.uid() = user_id OR public.has_role('ADMIN', 'HOD', 'DC', 'DHOD', 'FACULTY')` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable |
+| 12 | `faculty_profiles` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `auth.uid() = user_id OR public.has_role('ADMIN')` | **DENIED** | Mutable |
+| 13 | `faculty_expertise` | `auth.uid() IS NOT NULL` | `auth.uid() = faculty_id OR public.has_role('ADMIN')` | **DENIED** | `auth.uid() = faculty_id OR public.has_role('ADMIN')` | Mutable |
+| 14 | `research_domains` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN', 'HOD')` | `public.has_role('ADMIN', 'HOD')` | **DENIED** | Mutable (Admin) |
+| 15 | `theses` | `auth.uid() = student_id OR public.is_assigned_guide(id) OR public.is_assigned_coguide(id) OR (department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER')) OR public.is_assigned_panel_member(id)` | `public.has_role('STUDENT')` | Contextual State Machine Guards | **DENIED** | State-Controlled |
+| 16 | `thesis_titles` | Same as `theses` SELECT | `public.has_role('STUDENT')` | Contextual Title Guards | **DENIED** | State-Controlled |
 | 17 | `thesis_versions` | Same as `theses` SELECT | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
 | 18 | `thesis_domain_mappings`| Same as `theses` SELECT | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id)` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id)` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id)` | State-Controlled |
-| 19 | `annexure_1_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id)` | Contextual Draft Guards | **DENIED** | State-Controlled |
-| 20 | `guide_preferences` | Same as `annexure_1_submissions` SELECT | `auth.has_role('STUDENT')` | Contextual Draft Guards | `auth.has_role('STUDENT')` | Locked on Submit |
-| 21 | `dcec_dockets` | `auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER')` | `auth.has_role('DC')` | `auth.has_role('DC')` | **DENIED** | State-Controlled |
-| 22 | `dcec_decisions` | Same as `dcec_dockets` SELECT | `auth.is_active_dcec_chair(dept_id)` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 23 | `dcec_delegations` | `department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DHOD', 'ADMIN')` | `auth.has_role('HOD')` | `auth.has_role('HOD')` | **DENIED** | Time-Bounded |
-| 24 | `guide_allocations` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.uid() IN (guide_id, co_guide_id) OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('DHOD', 'HOD', 'DC'))` | `auth.has_role('DHOD')` | `auth.has_role('DHOD')` | **DENIED** | Mutable (D.HOD) |
+| 19 | `annexure_1_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id)` | Contextual Draft Guards | **DENIED** | State-Controlled |
+| 20 | `guide_preferences` | Same as `annexure_1_submissions` SELECT | `public.has_role('STUDENT')` | Contextual Draft Guards | `public.has_role('STUDENT')` | Locked on Submit |
+| 21 | `dcec_dockets` | `public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER')` | `public.has_role('DC')` | `public.has_role('DC')` | **DENIED** | State-Controlled |
+| 22 | `dcec_decisions` | Same as `dcec_dockets` SELECT | `public.is_active_dcec_chair(dept_id)` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
+| 23 | `dcec_delegations` | `department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DHOD', 'ADMIN')` | `public.has_role('HOD')` | `public.has_role('HOD')` | **DENIED** | Time-Bounded |
+| 24 | `guide_allocations` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.uid() IN (guide_id, co_guide_id) OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('DHOD', 'HOD', 'DC'))` | `public.has_role('DHOD')` | `public.has_role('DHOD')` | **DENIED** | Mutable (D.HOD) |
 | 25 | `guide_allocation_history`| Same as `guide_allocations` SELECT | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 26 | `annexure_2_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id) OR auth.has_role('HOD', 'DC')` | `auth.has_role('STUDENT')` | Contextual Draft Guards | **DENIED** | State-Controlled |
-| 27 | `supervisor_endorsements`| Same as `annexure_2_submissions` SELECT | `auth.uid() = faculty_id AND (auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 28 | `digital_logbook_entries`| `auth.uid() = student_id OR auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id)` | `auth.uid() = student_id` | Contextual Draft Guards | **DENIED** | State-Controlled |
-| 29 | `logbook_verifications` | Same as `digital_logbook_entries` SELECT | `auth.uid() = verifier_faculty_id AND (auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
+| 26 | `annexure_2_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id) OR public.has_role('HOD', 'DC')` | `public.has_role('STUDENT')` | Contextual Draft Guards | **DENIED** | State-Controlled |
+| 27 | `supervisor_endorsements`| Same as `annexure_2_submissions` SELECT | `auth.uid() = faculty_id AND (public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
+| 28 | `digital_logbook_entries`| `auth.uid() = student_id OR public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id)` | `auth.uid() = student_id` | Contextual Draft Guards | **DENIED** | State-Controlled |
+| 29 | `logbook_verifications` | Same as `digital_logbook_entries` SELECT | `auth.uid() = verifier_faculty_id AND (public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
 | 30 | `periodic_progress_reports`| Same as `digital_logbook_entries` SELECT | `auth.uid() = student_id` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 31 | `rubrics` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 32 | `rubric_versions` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN', 'HOD')` | `auth.has_role('ADMIN', 'HOD')` (Pre-publish only) | **DENIED (WORM)** | Immutable Publish|
-| 33 | `rubric_criteria` | `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` (Pre-publish only) | `auth.has_role('ADMIN')` (Pre-publish only) | Immutable Publish|
-| 34 | `rubric_achievement_levels`| `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` (Pre-publish only) | `auth.has_role('ADMIN')` (Pre-publish only) | Immutable Publish|
-| 35 | `milestone_evaluations` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id) OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('DC', 'HOD', 'DCEC_MEMBER'))` | `auth.has_role('DCEC_MEMBER', 'HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
-| 36 | `evaluation_criterion_scores`| Same as `milestone_evaluations` SELECT | `auth.has_role('DCEC_MEMBER', 'HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
-| 37 | `annexure_5_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id) OR auth.is_assigned_panel_member(thesis_id) OR auth.has_role('HOD', 'DC')` | `auth.has_role('STUDENT')` | Contextual Draft Guards | **DENIED** | State-Controlled |
-| 38 | `annexure_6_evaluations`| `(auth.uid() = guide_id OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('HOD', 'DCEC_CHAIR')) OR auth.is_assigned_panel_member(thesis_id)) AND auth.has_role('STUDENT') = FALSE` | `auth.uid() = guide_id AND auth.is_assigned_guide(thesis_id)` | **DENIED (WORM)** | **DENIED (WORM)** | **Append-Only Lock (Student Blocked)**|
-| 39 | `viva_defenses` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR auth.is_assigned_panel_member(thesis_id) OR auth.is_assigned_guide(thesis_id) OR auth.has_role('HOD', 'DC')` | `auth.has_role('DC', 'HOD')` | `auth.has_role('DC', 'HOD')` | **DENIED** | State-Controlled |
-| 40 | `defense_panels` | Same as `viva_defenses` SELECT | `auth.has_role('HOD')` | `auth.has_role('HOD')` | **DENIED** | State-Controlled |
-| 41 | `panel_member_assignments`| Same as `viva_defenses` SELECT | `auth.has_role('HOD')` | `auth.has_role('HOD')` | `auth.has_role('HOD')` | State-Controlled |
-| 42 | `panel_member_evaluations`| `auth.uid() = faculty_id OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = (SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id)) AND auth.has_role('HOD'))` | `auth.uid() = faculty_id AND auth.is_assigned_panel_member((SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
+| 31 | `rubrics` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 32 | `rubric_versions` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN', 'HOD')` | `public.has_role('ADMIN', 'HOD')` (Pre-publish only) | **DENIED (WORM)** | Immutable Publish|
+| 33 | `rubric_criteria` | `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` (Pre-publish only) | `public.has_role('ADMIN')` (Pre-publish only) | Immutable Publish|
+| 34 | `rubric_achievement_levels`| `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` (Pre-publish only) | `public.has_role('ADMIN')` (Pre-publish only) | Immutable Publish|
+| 35 | `milestone_evaluations` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id) OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('DC', 'HOD', 'DCEC_MEMBER'))` | `public.has_role('DCEC_MEMBER', 'HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
+| 36 | `evaluation_criterion_scores`| Same as `milestone_evaluations` SELECT | `public.has_role('DCEC_MEMBER', 'HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
+| 37 | `annexure_5_submissions`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id) OR public.is_assigned_panel_member(thesis_id) OR public.has_role('HOD', 'DC')` | `public.has_role('STUDENT')` | Contextual Draft Guards | **DENIED** | State-Controlled |
+| 38 | `annexure_6_evaluations`| `(auth.uid() = guide_id OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('HOD', 'DCEC_CHAIR')) OR public.is_assigned_panel_member(thesis_id)) AND public.has_role('STUDENT') = FALSE` | `auth.uid() = guide_id AND public.is_assigned_guide(thesis_id)` | **DENIED (WORM)** | **DENIED (WORM)** | **Append-Only Lock (Student Blocked)**|
+| 39 | `viva_defenses` | `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR public.is_assigned_panel_member(thesis_id) OR public.is_assigned_guide(thesis_id) OR public.has_role('HOD', 'DC')` | `public.has_role('DC', 'HOD')` | `public.has_role('DC', 'HOD')` | **DENIED** | State-Controlled |
+| 40 | `defense_panels` | Same as `viva_defenses` SELECT | `public.has_role('HOD')` | `public.has_role('HOD')` | **DENIED** | State-Controlled |
+| 41 | `panel_member_assignments`| Same as `viva_defenses` SELECT | `public.has_role('HOD')` | `public.has_role('HOD')` | `public.has_role('HOD')` | State-Controlled |
+| 42 | `panel_member_evaluations`| `auth.uid() = faculty_id OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = (SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id)) AND public.has_role('HOD'))` | `auth.uid() = faculty_id AND public.is_assigned_panel_member((SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id))` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
 | 43 | `re_viva_cycles` | Same as `viva_defenses` SELECT | SR-ONLY / HOD Trigger | **DENIED (WORM)** | **DENIED (WORM)** | State-Controlled |
-| 44 | `final_result_compilations`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('HOD', 'ADMIN'))` | `auth.has_role('HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
+| 44 | `final_result_compilations`| `auth.uid() = (SELECT student_id FROM theses WHERE id = thesis_id) OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('HOD', 'ADMIN'))` | `public.has_role('HOD')` | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only Lock |
 | 45 | `documents` | Evaluates `document_access_policies` + Relational Binding (Student permanently blocked if `is_student_restricted = TRUE`) | Authenticated Role Scoped | Contextual Version Update | **DENIED** | State-Controlled |
 | 46 | `document_versions` | Same as `documents` SELECT | Authenticated Role Scoped | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 47 | `document_access_policies`| `auth.uid() IS NOT NULL` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Static Reference |
-| 48 | `academic_events` | `auth.has_role('ADMIN', 'HOD')` | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
-| 49 | `notification_messages` | `auth.uid() IN (SELECT recipient_user_id FROM notification_deliveries WHERE message_id = id) OR auth.has_role('ADMIN')` | SR-ONLY / Event Processor | **DENIED** | **DENIED** | Mutable (Status) |
-| 50 | `notification_deliveries`| `auth.uid() = recipient_user_id OR auth.has_role('ADMIN')` | SR-ONLY / Event Processor | `auth.uid() = recipient_user_id` (Mark read) | `auth.uid() = recipient_user_id` | Mutable (Read) |
-| 51 | `audit_events` | `auth.has_role('ADMIN', 'HOD')` | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only WORM |
-| 52 | `system_configurations`| `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | `auth.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
-| 53 | `academic_policy_configurations`| `department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'ADMIN')` | `auth.has_role('HOD', 'ADMIN')` | `auth.has_role('HOD', 'ADMIN')` | **DENIED** | Time-Bounded |
-| 54 | `configuration_change_logs`| `auth.has_role('ADMIN', 'HOD')` | SR-ONLY / Config Service | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only WORM |
+| 47 | `document_access_policies`| `auth.uid() IS NOT NULL` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Static Reference |
+| 48 | `academic_events` | `public.has_role('ADMIN', 'HOD')` | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only |
+| 49 | `notification_messages` | `auth.uid() IN (SELECT recipient_user_id FROM notification_deliveries WHERE message_id = id) OR public.has_role('ADMIN')` | SR-ONLY / Event Processor | **DENIED** | **DENIED** | Mutable (Status) |
+| 50 | `notification_deliveries`| `auth.uid() = recipient_user_id OR public.has_role('ADMIN')` | SR-ONLY / Event Processor | `auth.uid() = recipient_user_id` (Mark read) | `auth.uid() = recipient_user_id` | Mutable (Read) |
+| 51 | `audit_events` | `public.has_role('ADMIN', 'HOD')` | SR-ONLY / Trigger | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only WORM |
+| 52 | `system_configurations`| `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | `public.has_role('ADMIN')` | **DENIED** | Mutable (Admin) |
+| 53 | `academic_policy_configurations`| `department_id = public.jwt_dept_id() AND public.has_role('HOD', 'ADMIN')` | `public.has_role('HOD', 'ADMIN')` | `public.has_role('HOD', 'ADMIN')` | **DENIED** | Time-Bounded |
+| 54 | `configuration_change_logs`| `public.has_role('ADMIN', 'HOD')` | SR-ONLY / Config Service | **DENIED (WORM)** | **DENIED (WORM)** | Append-Only WORM |
 
 ---
 
@@ -544,8 +544,8 @@ The topological migration sequence is strictly acyclic and accounts for all 54 t
     └── Custom Enums: thesis_state_enum, milestone_type_enum, document_type_enum, meeting_mode_enum
 
 002_rls_helper_functions
-    └── Functions: auth.jwt_dept_id, auth.has_role, auth.is_assigned_guide,
-                   auth.is_assigned_coguide, auth.is_assigned_panel_member, auth.is_active_dcec_chair
+    └── Functions: public.jwt_dept_id, public.has_role, public.is_assigned_guide,
+                   public.is_assigned_coguide, public.is_assigned_panel_member, public.is_active_dcec_chair
 
 003_organizational_hierarchy
     └── Tables: departments, academic_sessions, programs, batches, sections

@@ -730,19 +730,19 @@ Every physical table is secured with PostgreSQL RLS. Below are the authoritative
 
 ### 12.1 Table: `theses`
 - **SELECT Policy:** Permitted if:
-  `auth.uid() = student_id OR auth.uid() IN (guide_id, co_guide_id) OR (department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER')) OR auth.is_assigned_panel_member(id)`
-- **INSERT Policy:** Permitted only for `auth.has_role('STUDENT')` for their own `student_id`.
+  `auth.uid() = student_id OR auth.uid() IN (guide_id, co_guide_id) OR (department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER')) OR public.is_assigned_panel_member(id)`
+- **INSERT Policy:** Permitted only for `public.has_role('STUDENT')` for their own `student_id`.
 - **UPDATE Policy:** State-controlled through service layer using security-definer transition functions.
 - **DELETE Policy:** **DENIED (Zero Delete Grants).**
 
 ### 12.2 Table: `annexure_6_evaluations` (Confidential Supervisor Evaluation)
 - **SELECT Policy:** Permitted if:
-  `(auth.uid() = guide_id OR (auth.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND auth.has_role('HOD', 'DCEC_CHAIR')) OR auth.is_assigned_panel_member(thesis_id)) AND auth.has_role('STUDENT') = FALSE`
+  `(auth.uid() = guide_id OR (public.jwt_dept_id() = (SELECT department_id FROM theses WHERE id = thesis_id) AND public.has_role('HOD', 'DCEC_CHAIR')) OR public.is_assigned_panel_member(thesis_id)) AND public.has_role('STUDENT') = FALSE`
 - **INSERT / UPDATE Policy:** Permitted only if `auth.uid() = guide_id` and thesis is in `ANNEXURE_6_PENDING`.
 - **CRITICAL INVARIANT:** **Student access is permanently blocked at the RLS layer.**
 
 ### 12.3 Table: `audit_events` (Strictly Append-Only)
-- **SELECT Policy:** Permitted only for `auth.has_role('ADMIN', 'HOD')`.
+- **SELECT Policy:** Permitted only for `public.has_role('ADMIN', 'HOD')`.
 - **INSERT Policy:** Permitted only via automated security-definer audit triggers or server-side service role.
 - **UPDATE / DELETE Policy:** **PERMANENTLY DENIED (Zero Grants Exist).**
 

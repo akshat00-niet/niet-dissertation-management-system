@@ -43,14 +43,14 @@
 
 ### 3.2 Existing Custom Functions & Collisions
 - **Supabase Built-in Auth Functions:** `auth.uid() -> UUID`, `auth.jwt() -> JSONB`, `auth.role() -> TEXT`, `auth.email() -> TEXT`
-- **Proposed Migration Functions in `auth`:**
-  1. `auth.jwt_dept_id() -> UUID` (`SAFE` — No naming conflict)
-  2. `auth.has_role(VARIADIC text[]) -> BOOLEAN` (`SAFE` — No naming conflict)
-  3. `auth.is_assigned_guide(UUID) -> BOOLEAN` (`SAFE` — No naming conflict)
-  4. `auth.is_assigned_coguide(UUID) -> BOOLEAN` (`SAFE` — No naming conflict)
-  5. `auth.is_assigned_panel_member(UUID) -> BOOLEAN` (`SAFE` — No naming conflict)
-  6. `auth.is_active_dcec_chair(UUID) -> BOOLEAN` (`SAFE` — No naming conflict)
-- **Proposed Migration Functions in `public`:**
+- **Proposed Migration Custom Helper Functions in `public`:**
+  1. `public.jwt_dept_id() -> UUID` (`SAFE` — No naming conflict, public namespace)
+  2. `public.has_role(VARIADIC text[]) -> BOOLEAN` (`SAFE` — No naming conflict, public namespace)
+  3. `public.is_assigned_guide(UUID) -> BOOLEAN` (`SAFE` — No naming conflict, public namespace)
+  4. `public.is_assigned_coguide(UUID) -> BOOLEAN` (`SAFE` — No naming conflict, public namespace)
+  5. `public.is_assigned_panel_member(UUID) -> BOOLEAN` (`SAFE` — No naming conflict, public namespace)
+  6. `public.is_active_dcec_chair(UUID) -> BOOLEAN` (`SAFE` — No naming conflict, public namespace)
+- **Proposed Migration Trigger Functions in `public`:**
   1. `public.fn_normalize_thesis_title() -> TRIGGER` (`SAFE`)
   2. `public.fn_sync_thesis_supervisors_and_loads() -> TRIGGER` (`SAFE`)
   3. `public.fn_validate_rubric_version_publication() -> TRIGGER` (`SAFE`)
@@ -73,8 +73,8 @@
 - **Classification:** `SAFE`
 
 ### 4.2 Security Definer & RLS Compatibility
-- All 6 RLS helper functions are declared with `SECURITY DEFINER` and `SET search_path = public, auth, pg_temp`.
-- `auth.jwt_dept_id()` safely traps JSON parsing exceptions and falls back to `public.user_role_assignments`, ensuring it operates reliably on standard Supabase JWTs without custom auth hooks.
+- All 6 RLS helper functions are placed in `public` schema and declared with `SECURITY DEFINER` and `SET search_path = public, auth, pg_temp`.
+- `public.jwt_dept_id()` safely traps JSON parsing exceptions and falls back to `public.user_role_assignments`, ensuring it operates reliably on standard Supabase JWTs without custom auth hooks.
 - **Classification:** `SAFE`
 
 ---

@@ -1,13 +1,29 @@
 -- Migration: 002_rls_helper_functions.sql
--- Description: Define all custom RLS security-definer helper functions in the auth/public namespace.
+-- Description: Define all custom RLS security-definer helper functions in the public schema for Supabase compatibility.
 -- Target Engine: PostgreSQL 15+ (Hosted via Supabase)
 -- Phase: 002 of 018
 
--- Ensure schema exists
-CREATE SCHEMA IF NOT EXISTS auth;
+BEGIN;
+
+-- Safe Conditional Schema Check for Local Validation Environments
+-- On Supabase Cloud, auth schema and auth.uid()/auth.jwt() pre-exist; on local Postgres, stubs are provided.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'auth') THEN
+        CREATE SCHEMA auth;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'auth' AND p.proname = 'uid') THEN
+        EXECUTE 'CREATE FUNCTION auth.uid() RETURNS UUID LANGUAGE sql STABLE AS ''SELECT NULL::UUID''';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'auth' AND p.proname = 'jwt') THEN
+        EXECUTE 'CREATE FUNCTION auth.jwt() RETURNS JSONB LANGUAGE sql STABLE AS ''SELECT NULL::JSONB''';
+    END IF;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
 
 -- 1. Helper Function: Extract Department Tenancy with Safe Local Fallback
-CREATE OR REPLACE FUNCTION auth.jwt_dept_id()
+CREATE OR REPLACE FUNCTION public.jwt_dept_id()
 RETURNS UUID
 LANGUAGE plpgsql
 STABLE
@@ -39,7 +55,7 @@ END;
 $$;
 
 -- 2. Helper Function: Check Active Role Membership (Canonical Role Identifiers)
-CREATE OR REPLACE FUNCTION auth.has_role(VARIADIC allowed_roles text[])
+CREATE OR REPLACE FUNCTION public.has_role(VARIADIC allowed_roles text[])
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE
@@ -62,7 +78,7 @@ END;
 $$;
 
 -- 3. Helper Function: Check Primary Guide Assignment
-CREATE OR REPLACE FUNCTION auth.is_assigned_guide(p_thesis_id UUID)
+CREATE OR REPLACE FUNCTION public.is_assigned_guide(p_thesis_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE
@@ -84,7 +100,7 @@ END;
 $$;
 
 -- 4. Helper Function: Check Co-Guide Assignment
-CREATE OR REPLACE FUNCTION auth.is_assigned_coguide(p_thesis_id UUID)
+CREATE OR REPLACE FUNCTION public.is_assigned_coguide(p_thesis_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE
@@ -106,7 +122,7 @@ END;
 $$;
 
 -- 5. Helper Function: Check Defense Panel Membership
-CREATE OR REPLACE FUNCTION auth.is_assigned_panel_member(p_thesis_id UUID)
+CREATE OR REPLACE FUNCTION public.is_assigned_panel_member(p_thesis_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE
@@ -130,7 +146,7 @@ END;
 $$;
 
 -- 6. Helper Function: Check Active DCEC Chair Authority (HOD or Valid Delegation)
-CREATE OR REPLACE FUNCTION auth.is_active_dcec_chair(p_department_id UUID)
+CREATE OR REPLACE FUNCTION public.is_active_dcec_chair(p_department_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE
@@ -169,10 +185,12 @@ BEGIN
 END;
 $$;
 
--- Grant Execution Rights
-GRANT EXECUTE ON FUNCTION auth.jwt_dept_id() TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.has_role(VARIADIC text[]) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.is_assigned_guide(UUID) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.is_assigned_coguide(UUID) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.is_assigned_panel_member(UUID) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.is_active_dcec_chair(UUID) TO authenticated, service_role;
+-- Grant Execution Rights to Supabase standard roles
+GRANT EXECUTE ON FUNCTION public.jwt_dept_id() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.has_role(VARIADIC text[]) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_assigned_guide(UUID) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_assigned_coguide(UUID) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_assigned_panel_member(UUID) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_active_dcec_chair(UUID) TO authenticated, service_role;
+
+COMMIT;

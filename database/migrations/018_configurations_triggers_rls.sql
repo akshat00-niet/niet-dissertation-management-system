@@ -1,7 +1,9 @@
 -- Migration: 018_configurations_triggers_rls.sql
--- Description: Create configuration tables, immutability triggers, enable RLS across all 54 tables, and establish complete RLS policies.
+-- Description: Create configuration tables, immutability triggers, enable RLS across all 54 tables, and establish complete RLS policies using public.* helpers.
 -- Target Engine: PostgreSQL 15+ (Hosted via Supabase)
 -- Phase: 018 of 018
+
+BEGIN;
 
 -- ============================================================================
 -- 1. Configuration & Audit Tables
@@ -219,66 +221,66 @@ ALTER TABLE configuration_change_logs ENABLE ROW LEVEL SECURITY;
 
 -- Organizational Structure (Tables 1-5)
 CREATE POLICY p_departments_select ON departments FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_departments_admin ON departments FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_departments_admin ON departments FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_sessions_select ON academic_sessions FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_sessions_admin ON academic_sessions FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_sessions_admin ON academic_sessions FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_programs_select ON programs FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_programs_admin ON programs FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_programs_admin ON programs FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_batches_select ON batches FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_batches_admin ON batches FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_batches_admin ON batches FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_sections_select ON sections FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_sections_admin ON sections FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_sections_admin ON sections FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 -- Identity & RBAC (Tables 6-10)
-CREATE POLICY p_users_select ON users FOR SELECT TO authenticated USING (auth.uid() = id OR auth.has_role('ADMIN', 'HOD'));
-CREATE POLICY p_users_admin ON users FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_users_select ON users FOR SELECT TO authenticated USING (auth.uid() = id OR public.has_role('ADMIN', 'HOD'));
+CREATE POLICY p_users_admin ON users FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_roles_select ON roles FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_roles_admin ON roles FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_roles_admin ON roles FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_permissions_select ON permissions FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_permissions_admin ON permissions FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_permissions_admin ON permissions FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_role_permissions_select ON role_permissions FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_role_permissions_admin ON role_permissions FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_role_permissions_admin ON role_permissions FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
-CREATE POLICY p_user_role_assignments_select ON user_role_assignments FOR SELECT TO authenticated USING (auth.uid() = user_id OR auth.has_role('ADMIN', 'HOD'));
-CREATE POLICY p_user_role_assignments_admin ON user_role_assignments FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_user_role_assignments_select ON user_role_assignments FOR SELECT TO authenticated USING (auth.uid() = user_id OR public.has_role('ADMIN', 'HOD'));
+CREATE POLICY p_user_role_assignments_admin ON user_role_assignments FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 -- Academic Identity & Taxonomies (Tables 11-14)
-CREATE POLICY p_student_profiles_select ON student_profiles FOR SELECT TO authenticated USING (auth.uid() = user_id OR auth.has_role('ADMIN', 'HOD', 'DC', 'DHOD', 'FACULTY'));
-CREATE POLICY p_student_profiles_admin ON student_profiles FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_student_profiles_select ON student_profiles FOR SELECT TO authenticated USING (auth.uid() = user_id OR public.has_role('ADMIN', 'HOD', 'DC', 'DHOD', 'FACULTY'));
+CREATE POLICY p_student_profiles_admin ON student_profiles FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_faculty_profiles_select ON faculty_profiles FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_faculty_profiles_admin ON faculty_profiles FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_faculty_profiles_admin ON faculty_profiles FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_faculty_expertise_select ON faculty_expertise FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_faculty_expertise_modify ON faculty_expertise FOR ALL TO authenticated USING (auth.uid() = faculty_id OR auth.has_role('ADMIN')) WITH CHECK (auth.uid() = faculty_id OR auth.has_role('ADMIN'));
+CREATE POLICY p_faculty_expertise_modify ON faculty_expertise FOR ALL TO authenticated USING (auth.uid() = faculty_id OR public.has_role('ADMIN')) WITH CHECK (auth.uid() = faculty_id OR public.has_role('ADMIN'));
 
 CREATE POLICY p_research_domains_select ON research_domains FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_research_domains_admin ON research_domains FOR ALL TO authenticated USING (auth.has_role('ADMIN', 'HOD')) WITH CHECK (auth.has_role('ADMIN', 'HOD'));
+CREATE POLICY p_research_domains_admin ON research_domains FOR ALL TO authenticated USING (public.has_role('ADMIN', 'HOD')) WITH CHECK (public.has_role('ADMIN', 'HOD'));
 
 -- Thesis Core & Titles (Tables 15-18)
 CREATE POLICY p_theses_select ON theses FOR SELECT TO authenticated USING (
     auth.uid() = student_id
-    OR auth.is_assigned_guide(id)
-    OR auth.is_assigned_coguide(id)
-    OR (department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
-    OR auth.is_assigned_panel_member(id)
+    OR public.is_assigned_guide(id)
+    OR public.is_assigned_coguide(id)
+    OR (department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
+    OR public.is_assigned_panel_member(id)
 );
-CREATE POLICY p_theses_insert ON theses FOR INSERT TO authenticated WITH CHECK (auth.has_role('STUDENT') AND auth.uid() = student_id);
+CREATE POLICY p_theses_insert ON theses FOR INSERT TO authenticated WITH CHECK (public.has_role('STUDENT') AND auth.uid() = student_id);
 
 CREATE POLICY p_thesis_titles_select ON thesis_titles FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
-        OR auth.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
+        OR public.is_assigned_panel_member(t.id)
     ))
 );
 CREATE POLICY p_thesis_titles_insert ON thesis_titles FOR INSERT TO authenticated WITH CHECK (
@@ -288,20 +290,20 @@ CREATE POLICY p_thesis_titles_insert ON thesis_titles FOR INSERT TO authenticate
 CREATE POLICY p_thesis_versions_select ON thesis_versions FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
-        OR auth.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
+        OR public.is_assigned_panel_member(t.id)
     ))
 );
 
 CREATE POLICY p_thesis_domain_mappings_select ON thesis_domain_mappings FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
-        OR auth.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DHOD', 'DCEC_MEMBER'))
+        OR public.is_assigned_panel_member(t.id)
     ))
 );
 CREATE POLICY p_thesis_domain_mappings_modify ON thesis_domain_mappings FOR ALL TO authenticated USING (
@@ -314,7 +316,7 @@ CREATE POLICY p_thesis_domain_mappings_modify ON thesis_domain_mappings FOR ALL 
 CREATE POLICY p_annexure_1_select ON annexure_1_submissions FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
     ))
 );
 CREATE POLICY p_annexure_1_insert ON annexure_1_submissions FOR INSERT TO authenticated WITH CHECK (
@@ -327,7 +329,7 @@ CREATE POLICY p_guide_preferences_select ON guide_preferences FOR SELECT TO auth
         JOIN theses t ON t.id = a1.thesis_id
         WHERE a1.id = annexure_1_id AND (
             auth.uid() = t.student_id
-            OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+            OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
         )
     )
 );
@@ -341,12 +343,12 @@ CREATE POLICY p_guide_preferences_insert ON guide_preferences FOR INSERT TO auth
 
 -- DCEC Screening & Allocation (Tables 21-25)
 CREATE POLICY p_dcec_dockets_select ON dcec_dockets FOR SELECT TO authenticated USING (
-    EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+    EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
 );
 CREATE POLICY p_dcec_dockets_modify ON dcec_dockets FOR ALL TO authenticated USING (
-    auth.has_role('DC')
+    public.has_role('DC')
 ) WITH CHECK (
-    auth.has_role('DC')
+    public.has_role('DC')
 );
 
 CREATE POLICY p_dcec_decisions_select ON dcec_decisions FOR SELECT TO authenticated USING (
@@ -355,40 +357,40 @@ CREATE POLICY p_dcec_decisions_select ON dcec_decisions FOR SELECT TO authentica
         JOIN theses t ON t.id = dd.thesis_id
         WHERE dd.id = docket_id AND (
             auth.uid() = t.student_id
-            OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+            OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
         )
     )
 );
 CREATE POLICY p_dcec_decisions_insert ON dcec_decisions FOR INSERT TO authenticated WITH CHECK (
-    auth.is_active_dcec_chair((SELECT t.department_id FROM dcec_dockets dd JOIN theses t ON t.id = dd.thesis_id WHERE dd.id = docket_id))
+    public.is_active_dcec_chair((SELECT t.department_id FROM dcec_dockets dd JOIN theses t ON t.id = dd.thesis_id WHERE dd.id = docket_id))
 );
 
 CREATE POLICY p_dcec_delegations_select ON dcec_delegations FOR SELECT TO authenticated USING (
-    department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DHOD', 'ADMIN')
+    department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DHOD', 'ADMIN')
 );
 CREATE POLICY p_dcec_delegations_admin ON dcec_delegations FOR ALL TO authenticated USING (
-    department_id = auth.jwt_dept_id() AND auth.has_role('HOD')
+    department_id = public.jwt_dept_id() AND public.has_role('HOD')
 ) WITH CHECK (
-    department_id = auth.jwt_dept_id() AND auth.has_role('HOD')
+    department_id = public.jwt_dept_id() AND public.has_role('HOD')
 );
 
 CREATE POLICY p_guide_allocations_select ON guide_allocations FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
         OR auth.uid() IN (guide_id, co_guide_id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DHOD', 'HOD', 'DC'))
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('DHOD', 'HOD', 'DC'))
     ))
 );
 CREATE POLICY p_guide_allocations_dhod ON guide_allocations FOR ALL TO authenticated USING (
-    auth.has_role('DHOD')
+    public.has_role('DHOD')
 ) WITH CHECK (
-    auth.has_role('DHOD')
+    public.has_role('DHOD')
 );
 
 CREATE POLICY p_guide_allocation_history_select ON guide_allocation_history FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DHOD', 'HOD', 'DC'))
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('DHOD', 'HOD', 'DC'))
     ))
 );
 
@@ -396,9 +398,9 @@ CREATE POLICY p_guide_allocation_history_select ON guide_allocation_history FOR 
 CREATE POLICY p_annexure_2_select ON annexure_2_submissions FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DCEC_MEMBER'))
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DCEC_MEMBER'))
     ))
 );
 CREATE POLICY p_annexure_2_insert ON annexure_2_submissions FOR INSERT TO authenticated WITH CHECK (
@@ -408,20 +410,20 @@ CREATE POLICY p_annexure_2_insert ON annexure_2_submissions FOR INSERT TO authen
 CREATE POLICY p_supervisor_endorsements_select ON supervisor_endorsements FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC', 'DCEC_MEMBER'))
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC', 'DCEC_MEMBER'))
     ))
 );
 CREATE POLICY p_supervisor_endorsements_insert ON supervisor_endorsements FOR INSERT TO authenticated WITH CHECK (
-    auth.uid() = faculty_id AND (auth.is_assigned_guide(thesis_id) OR auth.is_assigned_coguide(thesis_id))
+    auth.uid() = faculty_id AND (public.is_assigned_guide(thesis_id) OR public.is_assigned_coguide(thesis_id))
 );
 
 -- Logbook & Progress (Tables 28-30)
 CREATE POLICY p_digital_logbook_select ON digital_logbook_entries FOR SELECT TO authenticated USING (
     auth.uid() = student_id
-    OR auth.is_assigned_guide(thesis_id)
-    OR auth.is_assigned_coguide(thesis_id)
+    OR public.is_assigned_guide(thesis_id)
+    OR public.is_assigned_coguide(thesis_id)
 );
 CREATE POLICY p_digital_logbook_insert ON digital_logbook_entries FOR INSERT TO authenticated WITH CHECK (
     auth.uid() = student_id
@@ -432,8 +434,8 @@ CREATE POLICY p_logbook_verifications_select ON logbook_verifications FOR SELECT
         SELECT 1 FROM digital_logbook_entries dle
         WHERE dle.id = logbook_entry_id AND (
             auth.uid() = dle.student_id
-            OR auth.is_assigned_guide(dle.thesis_id)
-            OR auth.is_assigned_coguide(dle.thesis_id)
+            OR public.is_assigned_guide(dle.thesis_id)
+            OR public.is_assigned_coguide(dle.thesis_id)
         )
     )
 );
@@ -442,15 +444,15 @@ CREATE POLICY p_logbook_verifications_insert ON logbook_verifications FOR INSERT
     AND EXISTS (
         SELECT 1 FROM digital_logbook_entries dle
         WHERE dle.id = logbook_entry_id AND (
-            auth.is_assigned_guide(dle.thesis_id) OR auth.is_assigned_coguide(dle.thesis_id)
+            public.is_assigned_guide(dle.thesis_id) OR public.is_assigned_coguide(dle.thesis_id)
         )
     )
 );
 
 CREATE POLICY p_periodic_progress_select ON periodic_progress_reports FOR SELECT TO authenticated USING (
     auth.uid() = student_id
-    OR auth.is_assigned_guide(thesis_id)
-    OR auth.is_assigned_coguide(thesis_id)
+    OR public.is_assigned_guide(thesis_id)
+    OR public.is_assigned_coguide(thesis_id)
 );
 CREATE POLICY p_periodic_progress_insert ON periodic_progress_reports FOR INSERT TO authenticated WITH CHECK (
     auth.uid() = student_id
@@ -458,28 +460,28 @@ CREATE POLICY p_periodic_progress_insert ON periodic_progress_reports FOR INSERT
 
 -- Dynamic Rubrics (Tables 31-34)
 CREATE POLICY p_rubrics_select ON rubrics FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_rubrics_admin ON rubrics FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_rubrics_admin ON rubrics FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_rubric_versions_select ON rubric_versions FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_rubric_versions_admin ON rubric_versions FOR ALL TO authenticated USING (auth.has_role('ADMIN', 'HOD')) WITH CHECK (auth.has_role('ADMIN', 'HOD'));
+CREATE POLICY p_rubric_versions_admin ON rubric_versions FOR ALL TO authenticated USING (public.has_role('ADMIN', 'HOD')) WITH CHECK (public.has_role('ADMIN', 'HOD'));
 
 CREATE POLICY p_rubric_criteria_select ON rubric_criteria FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_rubric_criteria_admin ON rubric_criteria FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_rubric_criteria_admin ON rubric_criteria FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_rubric_levels_select ON rubric_achievement_levels FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_rubric_levels_admin ON rubric_achievement_levels FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_rubric_levels_admin ON rubric_achievement_levels FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 -- Milestone Evaluations (Tables 35-36)
 CREATE POLICY p_milestone_evaluations_select ON milestone_evaluations FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DCEC_MEMBER'))
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DCEC_MEMBER'))
     ))
 );
 CREATE POLICY p_milestone_evaluations_insert ON milestone_evaluations FOR INSERT TO authenticated WITH CHECK (
-    auth.has_role('DCEC_MEMBER', 'HOD')
+    public.has_role('DCEC_MEMBER', 'HOD')
 );
 
 CREATE POLICY p_eval_criterion_scores_select ON evaluation_criterion_scores FOR SELECT TO authenticated USING (
@@ -488,25 +490,25 @@ CREATE POLICY p_eval_criterion_scores_select ON evaluation_criterion_scores FOR 
         JOIN theses t ON t.id = me.thesis_id
         WHERE me.id = milestone_evaluation_id AND (
             auth.uid() = t.student_id
-            OR auth.is_assigned_guide(t.id)
-            OR auth.is_assigned_coguide(t.id)
-            OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DCEC_MEMBER'))
+            OR public.is_assigned_guide(t.id)
+            OR public.is_assigned_coguide(t.id)
+            OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DCEC_MEMBER'))
         )
     )
 );
 CREATE POLICY p_eval_criterion_scores_insert ON evaluation_criterion_scores FOR INSERT TO authenticated WITH CHECK (
-    auth.has_role('DCEC_MEMBER', 'HOD')
+    public.has_role('DCEC_MEMBER', 'HOD')
 );
 
 -- Documents & Storage (Tables 45-47)
 CREATE POLICY p_documents_select ON documents FOR SELECT TO authenticated USING (
-    (is_student_restricted = FALSE OR auth.has_role('STUDENT') = FALSE)
+    (is_student_restricted = FALSE OR public.has_role('STUDENT') = FALSE)
     AND EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
-        OR auth.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+        OR public.is_assigned_panel_member(t.id)
     ))
 );
 CREATE POLICY p_documents_insert ON documents FOR INSERT TO authenticated WITH CHECK (
@@ -518,13 +520,13 @@ CREATE POLICY p_document_versions_select ON document_versions FOR SELECT TO auth
         SELECT 1 FROM documents d
         JOIN theses t ON t.id = d.thesis_id
         WHERE d.id = document_id
-          AND (d.is_student_restricted = FALSE OR auth.has_role('STUDENT') = FALSE)
+          AND (d.is_student_restricted = FALSE OR public.has_role('STUDENT') = FALSE)
           AND (
             auth.uid() = t.student_id
-            OR auth.is_assigned_guide(t.id)
-            OR auth.is_assigned_coguide(t.id)
-            OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
-            OR auth.is_assigned_panel_member(t.id)
+            OR public.is_assigned_guide(t.id)
+            OR public.is_assigned_coguide(t.id)
+            OR (t.department_id = public.jwt_dept_id() AND public.has_role('DC', 'HOD', 'DHOD', 'DCEC_MEMBER'))
+            OR public.is_assigned_panel_member(t.id)
           )
     )
 );
@@ -533,16 +535,16 @@ CREATE POLICY p_document_versions_insert ON document_versions FOR INSERT TO auth
 );
 
 CREATE POLICY p_doc_access_policies_select ON document_access_policies FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_doc_access_policies_admin ON document_access_policies FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_doc_access_policies_admin ON document_access_policies FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 -- Annexure 5 & Annexure 6 (Tables 37-38)
 CREATE POLICY p_annexure_5_select ON annexure_5_submissions FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR auth.is_assigned_coguide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC'))
-        OR auth.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR public.is_assigned_coguide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC'))
+        OR public.is_assigned_panel_member(t.id)
     ))
 );
 CREATE POLICY p_annexure_5_insert ON annexure_5_submissions FOR INSERT TO authenticated WITH CHECK (
@@ -551,30 +553,30 @@ CREATE POLICY p_annexure_5_insert ON annexure_5_submissions FOR INSERT TO authen
 
 -- CRITICAL SECURITY RULE: Student Access Permanently Blocked from Annexure 6 at RLS Layer
 CREATE POLICY p_annexure_6_select ON annexure_6_evaluations FOR SELECT TO authenticated USING (
-    auth.has_role('STUDENT') = FALSE
+    public.has_role('STUDENT') = FALSE
     AND (
         auth.uid() = guide_id
-        OR (EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DCEC_CHAIR')))
-        OR auth.is_assigned_panel_member(thesis_id)
+        OR (EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DCEC_CHAIR')))
+        OR public.is_assigned_panel_member(thesis_id)
     )
 );
 CREATE POLICY p_annexure_6_insert ON annexure_6_evaluations FOR INSERT TO authenticated WITH CHECK (
-    auth.uid() = guide_id AND auth.is_assigned_guide(thesis_id) AND auth.has_role('STUDENT') = FALSE
+    auth.uid() = guide_id AND public.is_assigned_guide(thesis_id) AND public.has_role('STUDENT') = FALSE
 );
 
 -- Viva Defense & Remediation (Tables 39-44)
 CREATE POLICY p_viva_defenses_select ON viva_defenses FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_panel_member(t.id)
-        OR auth.is_assigned_guide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC'))
+        OR public.is_assigned_panel_member(t.id)
+        OR public.is_assigned_guide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC'))
     ))
 );
 CREATE POLICY p_viva_defenses_admin ON viva_defenses FOR ALL TO authenticated USING (
-    auth.has_role('DC', 'HOD')
+    public.has_role('DC', 'HOD')
 ) WITH CHECK (
-    auth.has_role('DC', 'HOD')
+    public.has_role('DC', 'HOD')
 );
 
 CREATE POLICY p_defense_panels_select ON defense_panels FOR SELECT TO authenticated USING (
@@ -583,22 +585,22 @@ CREATE POLICY p_defense_panels_select ON defense_panels FOR SELECT TO authentica
         JOIN theses t ON t.id = vd.thesis_id
         WHERE vd.id = viva_defense_id AND (
             auth.uid() = t.student_id
-            OR auth.is_assigned_panel_member(t.id)
-            OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC'))
+            OR public.is_assigned_panel_member(t.id)
+            OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC'))
         )
     )
 );
 CREATE POLICY p_defense_panels_admin ON defense_panels FOR ALL TO authenticated USING (
-    auth.has_role('HOD')
+    public.has_role('HOD')
 ) WITH CHECK (
-    auth.has_role('HOD')
+    public.has_role('HOD')
 );
 
 CREATE POLICY p_panel_member_assignments_select ON panel_member_assignments FOR SELECT TO authenticated USING (TRUE);
 CREATE POLICY p_panel_member_assignments_admin ON panel_member_assignments FOR ALL TO authenticated USING (
-    auth.has_role('HOD')
+    public.has_role('HOD')
 ) WITH CHECK (
-    auth.has_role('HOD')
+    public.has_role('HOD')
 );
 
 CREATE POLICY p_panel_member_evaluations_select ON panel_member_evaluations FOR SELECT TO authenticated USING (
@@ -606,42 +608,42 @@ CREATE POLICY p_panel_member_evaluations_select ON panel_member_evaluations FOR 
     OR EXISTS (
         SELECT 1 FROM viva_defenses vd
         JOIN theses t ON t.id = vd.thesis_id
-        WHERE vd.id = viva_defense_id AND t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD')
+        WHERE vd.id = viva_defense_id AND t.department_id = public.jwt_dept_id() AND public.has_role('HOD')
     )
 );
 CREATE POLICY p_panel_member_evaluations_insert ON panel_member_evaluations FOR INSERT TO authenticated WITH CHECK (
     auth.uid() = faculty_id
-    AND auth.is_assigned_panel_member((SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id))
+    AND public.is_assigned_panel_member((SELECT thesis_id FROM viva_defenses WHERE id = viva_defense_id))
 );
 
 CREATE POLICY p_re_viva_cycles_select ON re_viva_cycles FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR auth.is_assigned_guide(t.id)
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'DC'))
+        OR public.is_assigned_guide(t.id)
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'DC'))
     ))
 );
 
 CREATE POLICY p_final_result_compilations_select ON final_result_compilations FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM theses t WHERE t.id = thesis_id AND (
         auth.uid() = t.student_id
-        OR (t.department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'ADMIN'))
+        OR (t.department_id = public.jwt_dept_id() AND public.has_role('HOD', 'ADMIN'))
     ))
 );
 CREATE POLICY p_final_result_compilations_insert ON final_result_compilations FOR INSERT TO authenticated WITH CHECK (
-    auth.has_role('HOD')
+    public.has_role('HOD')
 );
 
 -- Notifications & Audit (Tables 48-51)
-CREATE POLICY p_academic_events_select ON academic_events FOR SELECT TO authenticated USING (auth.has_role('ADMIN', 'HOD'));
+CREATE POLICY p_academic_events_select ON academic_events FOR SELECT TO authenticated USING (public.has_role('ADMIN', 'HOD'));
 
 CREATE POLICY p_notification_messages_select ON notification_messages FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM notification_deliveries nd WHERE nd.message_id = id AND nd.recipient_user_id = auth.uid())
-    OR auth.has_role('ADMIN')
+    OR public.has_role('ADMIN')
 );
 
 CREATE POLICY p_notification_deliveries_select ON notification_deliveries FOR SELECT TO authenticated USING (
-    recipient_user_id = auth.uid() OR auth.has_role('ADMIN')
+    recipient_user_id = auth.uid() OR public.has_role('ADMIN')
 );
 CREATE POLICY p_notification_deliveries_update ON notification_deliveries FOR UPDATE TO authenticated USING (
     recipient_user_id = auth.uid()
@@ -650,20 +652,22 @@ CREATE POLICY p_notification_deliveries_update ON notification_deliveries FOR UP
 );
 
 CREATE POLICY p_audit_events_select ON audit_events FOR SELECT TO authenticated USING (
-    auth.has_role('ADMIN', 'HOD')
+    public.has_role('ADMIN', 'HOD')
 );
 
 -- Configuration & Change Logs (Tables 52-54)
 CREATE POLICY p_system_configs_select ON system_configurations FOR SELECT TO authenticated USING (TRUE);
-CREATE POLICY p_system_configs_admin ON system_configurations FOR ALL TO authenticated USING (auth.has_role('ADMIN')) WITH CHECK (auth.has_role('ADMIN'));
+CREATE POLICY p_system_configs_admin ON system_configurations FOR ALL TO authenticated USING (public.has_role('ADMIN')) WITH CHECK (public.has_role('ADMIN'));
 
 CREATE POLICY p_policy_configs_select ON academic_policy_configurations FOR SELECT TO authenticated USING (TRUE);
 CREATE POLICY p_policy_configs_admin ON academic_policy_configurations FOR ALL TO authenticated USING (
-    department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'ADMIN')
+    department_id = public.jwt_dept_id() AND public.has_role('HOD', 'ADMIN')
 ) WITH CHECK (
-    department_id = auth.jwt_dept_id() AND auth.has_role('HOD', 'ADMIN')
+    department_id = public.jwt_dept_id() AND public.has_role('HOD', 'ADMIN')
 );
 
 CREATE POLICY p_config_change_logs_select ON configuration_change_logs FOR SELECT TO authenticated USING (
-    auth.has_role('ADMIN', 'HOD')
+    public.has_role('ADMIN', 'HOD')
 );
+
+COMMIT;
