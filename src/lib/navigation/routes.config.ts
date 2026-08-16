@@ -150,6 +150,27 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         description: 'Review dual-endorsed Annexure 2 title approval dockets',
       },
       {
+        id: 'dc-milestones',
+        label: 'DC Milestone Scheduling',
+        href: '/app/dc/milestones',
+        allowedRoles: ['DC', 'HOD'],
+        description: 'Schedule P1, P2, and P3 milestone presentation sessions',
+      },
+      {
+        id: 'dcec-milestones',
+        label: 'DCEC Milestone Evaluations',
+        href: '/app/dcec/milestones',
+        allowedRoles: ['HOD', 'DHOD', 'DCEC_MEMBER', 'DCEC_CHAIR'],
+        description: 'Review and evaluate scheduled milestone presentations',
+      },
+      {
+        id: 'dept-milestones',
+        label: 'Department Milestones',
+        href: '/app/department/milestones',
+        allowedRoles: ['HOD', 'DHOD', 'DC', 'DCEC_MEMBER', 'DCEC_CHAIR'],
+        description: 'Cohort milestone tracking and performance analytics',
+      },
+      {
         id: 'dept-compliance',
         label: 'Department Overview',
         href: '/app/department/compliance',
