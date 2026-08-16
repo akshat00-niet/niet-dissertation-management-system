@@ -44,28 +44,25 @@ export interface Department {
 
 export interface StudentProfile {
   user_id: string;
-  department_id: string;
-  session_id: string;
-  program_id: string;
-  batch_id: string;
-  section_id: string | null;
   roll_number: string;
-  admission_year: number;
+  enrollment_number: string;
+  program_id: string;
+  department_id: string;
+  batch_name: string;
   current_semester: number;
-  academic_standing: string;
+  is_eligible: boolean;
+  created_at: string;
 }
 
 export interface FacultyProfile {
   user_id: string;
-  department_id: string;
   employee_code: string;
   designation: string;
-  max_primary_supervision_load: number;
-  max_co_supervision_load: number;
-  current_primary_load: number;
-  current_co_load: number;
-  is_dcec_eligible: boolean;
-  is_active: boolean;
+  department_id: string;
+  active_guide_load: number;
+  active_coguide_load: number;
+  is_available: boolean;
+  created_at: string;
 }
 
 export interface AppSession {
@@ -79,4 +76,55 @@ export interface AppSession {
   activeDepartmentId: string | null;
   studentProfile: StudentProfile | null;
   facultyProfile: FacultyProfile | null;
+}
+
+export interface Thesis {
+  id: string;
+  tracking_number: string;
+  student_id: string;
+  department_id: string;
+  session_id: string;
+  current_state: string;
+  current_stage: string;
+  guide_id: string | null;
+  co_guide_id: string | null;
+  defense_cycle_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ThesisTitle {
+  id: string;
+  thesis_id: string;
+  proposed_title: string;
+  final_approved_title: string | null;
+  normalized_title: string;
+  is_approved: boolean;
+  approved_at: string | null;
+}
+
+export interface ThesisWithActiveTitle extends Thesis {
+  active_title: string | null;
+}
+
+export interface Annexure6Evaluation {
+  id: string;
+  thesis_id: string;
+  guide_id: string;
+  supervisor_score: number;
+  regularity_rating: string;
+  technical_proficiency: string;
+  rigor_rating: string;
+  confidential_remarks: string;
+  defense_recommendation: 'RECOMMENDED' | 'REVISIONS_REQUIRED' | 'NOT_RECOMMENDED';
+  submitted_at: string;
+}
+
+export interface ThesisFilterParams {
+  studentId?: string;
+  guideId?: string;
+  departmentId?: string;
+  sessionId?: string;
+  currentStage?: string;
+  currentState?: string;
 }

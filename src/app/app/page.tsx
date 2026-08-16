@@ -145,8 +145,12 @@ export default async function ApplicationShellPage() {
                   <dd>Semester {studentProfile.current_semester}</dd>
                 </div>
                 <div>
-                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Academic Standing</dt>
-                  <dd><span className="badge badge-success">{studentProfile.academic_standing}</span></dd>
+                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Enrollment / Batch</dt>
+                  <dd>{studentProfile.enrollment_number} ({studentProfile.batch_name})</dd>
+                </div>
+                <div>
+                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Eligibility Status</dt>
+                  <dd><span className={`badge ${studentProfile.is_eligible ? 'badge-success' : 'badge-primary'}`}>{studentProfile.is_eligible ? 'ELIGIBLE' : 'INELIGIBLE'}</span></dd>
                 </div>
               </dl>
             )}
@@ -162,12 +166,12 @@ export default async function ApplicationShellPage() {
                   <dd>{facultyProfile.designation}</dd>
                 </div>
                 <div>
-                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Primary Supervision Load</dt>
-                  <dd>{facultyProfile.current_primary_load} / {facultyProfile.max_primary_supervision_load}</dd>
+                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Active Supervision Loads</dt>
+                  <dd>Guide: {facultyProfile.active_guide_load}/3 | Co-Guide: {facultyProfile.active_coguide_load}/3</dd>
                 </div>
                 <div>
-                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>DCEC Screening Eligible</dt>
-                  <dd><span className={`badge ${facultyProfile.is_dcec_eligible ? 'badge-success' : 'badge-primary'}`}>{facultyProfile.is_dcec_eligible ? 'YES' : 'NO'}</span></dd>
+                  <dt style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Availability Status</dt>
+                  <dd><span className={`badge ${facultyProfile.is_available ? 'badge-success' : 'badge-primary'}`}>{facultyProfile.is_available ? 'AVAILABLE' : 'UNAVAILABLE'}</span></dd>
                 </div>
               </dl>
             )}
