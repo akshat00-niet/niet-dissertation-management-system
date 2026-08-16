@@ -131,3 +131,4 @@ export interface ThesisFilterParams {
 
 export * from './annexure1.types';
 export * from './dcec.types';
+export * from './allocation.types';
