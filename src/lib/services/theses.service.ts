@@ -9,6 +9,7 @@ import type {
 import {
   getThesisWithActiveTitle,
   listTheses,
+  getStudentActiveThesis,
 } from '@/lib/dal/theses.dal';
 import { getAnnexure6EvaluationByThesisId } from '@/lib/dal/annexures.dal';
 import { NotFoundError, UnauthorizedError, ValidationError } from '@/lib/dal/errors';
@@ -47,6 +48,22 @@ export async function listAccessibleTheses(
 ): Promise<ThesisWithActiveTitle[]> {
   const supabase = client || createClient();
   return await listTheses(supabase, filters);
+}
+
+/**
+ * Service to resolve the active dissertation for the authenticated student candidate.
+ */
+export async function getStudentActiveDissertation(
+  session: AppSession,
+  client?: SupabaseClient
+): Promise<ThesisWithActiveTitle | null> {
+  const supabase = client || createClient();
+
+  if (session.appUser.role_category !== 'STUDENT') {
+    throw new UnauthorizedError('Student active dissertation lookup is restricted to students.');
+  }
+
+  return await getStudentActiveThesis(supabase, session.appUser.id);
 }
 
 /**

@@ -144,3 +144,14 @@ export async function getCurrentAppSession(): Promise<AppSession | null> {
     facultyProfile,
   };
 }
+
+/**
+ * Requires an authenticated AppSession. Throws UnauthorizedError if unauthenticated.
+ */
+export async function requireAuthenticatedUser(): Promise<AppSession> {
+  const session = await getCurrentAppSession();
+  if (!session) {
+    throw new Error('Authentication required.');
+  }
+  return session;
+}

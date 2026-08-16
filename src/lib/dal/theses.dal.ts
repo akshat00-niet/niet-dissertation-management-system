@@ -144,3 +144,65 @@ export async function listTheses(
     active_title: titleMap.get(t.id) || null,
   }));
 }
+
+/**
+ * Fetches the active dissertation record for a student.
+ * Active dissertations are those whose current_state is not 'ARCHIVED' or 'PROPOSAL_REJECTED_TERMINAL'.
+ */
+export async function getStudentActiveThesis(
+  client: SupabaseClient,
+  studentId: string
+): Promise<ThesisWithActiveTitle | null> {
+  const { data, error } = await client
+    .from('theses')
+    .select(
+      'id, tracking_number, student_id, department_id, session_id, current_state, current_stage, guide_id, co_guide_id, defense_cycle_index, created_at, updated_at'
+    )
+    .eq('student_id', studentId)
+    .not('current_state', 'in', '("ARCHIVED","PROPOSAL_REJECTED_TERMINAL")')
+    .maybeSingle();
+
+  if (error) {
+    throw mapPostgrestError(error, 'theses.dal.getStudentActiveThesis');
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const titleRecord = await getThesisActiveTitle(client, data.id);
+
+  return {
+    ...(data as Thesis),
+    active_title: titleRecord?.final_approved_title || titleRecord?.proposed_title || null,
+  };
+}
+
+/**
+ * Checks if a proposed title normalized string is already registered by another thesis.
+ * Returns true if duplicate exists, false otherwise.
+ */
+export async function checkTitleCollision(
+  client: SupabaseClient,
+  proposedTitle: string,
+  excludeThesisId?: string
+): Promise<boolean> {
+  if (!proposedTitle || trimTitle(proposedTitle) === '') {
+    return false;
+  }
+
+  const { data, error } = await client.rpc('check_title_collision', {
+    p_title: proposedTitle,
+    p_exclude_thesis_id: excludeThesisId || null,
+  });
+
+  if (error) {
+    throw mapPostgrestError(error, 'theses.dal.checkTitleCollision');
+  }
+
+  return !!data;
+}
+
+function trimTitle(str: string): string {
+  return str ? str.trim() : '';
+}

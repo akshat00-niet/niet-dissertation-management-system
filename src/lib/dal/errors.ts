@@ -60,11 +60,24 @@ export class UnauthorizedError extends AppError {
  * Validation Error (422)
  */
 export class ValidationError extends AppError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Invalid request parameters.', cause?: unknown) {
     super(message, {
-      code: 'VALIDATION_FAILED',
+      code: 'VALIDATION_ERROR',
       statusCode: 422,
-      details,
+      cause,
+    });
+  }
+}
+
+/**
+ * Conflict Error (409)
+ */
+export class ConflictError extends AppError {
+  constructor(message = 'A conflicting record already exists.', cause?: unknown) {
+    super(message, {
+      code: 'CONFLICT',
+      statusCode: 409,
+      cause,
     });
   }
 }
@@ -96,24 +109,44 @@ export function mapPostgrestError(error: PostgrestError, context?: string): AppE
     );
   }
 
-  // Row not found when single row requested
-  if (error.code === 'PGRST116') {
+  // Row not found when single row requested or P0002
+  if (error.code === 'PGRST116' || error.code === 'P0002') {
     return new NotFoundError(`${prefix}Resource`);
   }
 
   // Unique constraint violation
   if (error.code === '23505') {
-    return new AppError(`${prefix}A record with conflicting unique values already exists.`, {
-      code: 'CONFLICT',
-      statusCode: 409,
-    });
+    return new AppError(
+      `${prefix}${error.message || 'A record with conflicting unique values already exists.'}`,
+      {
+        code: 'CONFLICT',
+        statusCode: 409,
+      }
+    );
   }
 
-  // Foreign key or check constraint violation
-  if (error.code === '23503' || error.code === '23514') {
-    return new ValidationError(`${prefix}Database constraint validation failed.`);
+  // Foreign key, check constraint, or invalid parameter validation
+  if (error.code === '23503' || error.code === '23514' || error.code === '22023') {
+    return new ValidationError(`${prefix}${error.message || 'Database constraint validation failed.'}`);
+  }
+
+  // Handle custom RPC raise exceptions (P0001)
+  if (error.code === 'P0001' && error.message) {
+    if (error.message.startsWith('Unauthorized:')) {
+      return new UnauthorizedError(`${prefix}${error.message}`);
+    }
+    if (error.message.startsWith('NotFound:')) {
+      return new NotFoundError(`${prefix}${error.message}`);
+    }
+    if (error.message.startsWith('InvalidState:')) {
+      return new AppError(`${prefix}${error.message}`, { code: 'CONFLICT', statusCode: 409 });
+    }
+    if (error.message.startsWith('Validation:')) {
+      return new ValidationError(`${prefix}${error.message}`);
+    }
+    return new AppError(`${prefix}${error.message}`, { code: 'BAD_REQUEST', statusCode: 400 });
   }
 
   // Generic fallback without leaking raw SQL / table details
-  return new DatabaseError(`${prefix}Failed to complete database operation.`, error.message);
+  return new DatabaseError(`${prefix}${error.message || 'Failed to complete database operation.'}`, error);
 }

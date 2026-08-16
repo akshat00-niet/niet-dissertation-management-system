@@ -128,3 +128,5 @@ export interface ThesisFilterParams {
   currentStage?: string;
   currentState?: string;
 }
+
+export * from './annexure1.types';
