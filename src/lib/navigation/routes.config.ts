@@ -143,6 +143,13 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         description: 'Manual supervisor allocation and capacity tracking (≤3)',
       },
       {
+        id: 'dept-title-approvals',
+        label: 'DCEC Title Approvals',
+        href: '/app/dcec/title-approvals',
+        allowedRoles: ['HOD', 'DHOD', 'DCEC_MEMBER', 'DCEC_CHAIR'],
+        description: 'Review dual-endorsed Annexure 2 title approval dockets',
+      },
+      {
         id: 'dept-compliance',
         label: 'Department Overview',
         href: '/app/department/compliance',
