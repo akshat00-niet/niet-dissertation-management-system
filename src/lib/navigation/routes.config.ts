@@ -102,7 +102,7 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         id: 'guide-logbook',
         label: 'Logbook Verifications',
         href: '/app/guide/logbook',
-        allowedRoles: ['GUIDE', 'CO_GUIDE'],
+        allowedRoles: ['GUIDE', 'CO_GUIDE', 'FACULTY'],
         description: 'Review and verify Annexure 4 meeting entries',
       },
       {

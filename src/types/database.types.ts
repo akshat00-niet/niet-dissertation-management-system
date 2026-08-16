@@ -133,3 +133,4 @@ export * from './annexure1.types';
 export * from './dcec.types';
 export * from './allocation.types';
 export * from './annexure2.types';
+export * from './logbook.types';
