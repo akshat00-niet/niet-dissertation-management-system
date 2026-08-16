@@ -122,11 +122,18 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
     allowedRoles: ['DC', 'DHOD', 'HOD', 'DCEC_MEMBER', 'DCEC_CHAIR'],
     items: [
       {
+        id: 'dc-screening',
+        label: 'DC Screening Queue',
+        href: '/app/dc/screening',
+        allowedRoles: ['DC'],
+        description: 'Verify candidate eligibility, documentation, and compile dockets',
+      },
+      {
         id: 'dept-screening',
-        label: 'DCEC Screening Queue',
-        href: '/app/department/screening',
-        allowedRoles: ['DC', 'DCEC_MEMBER', 'DCEC_CHAIR', 'HOD'],
-        description: 'Proposal screening dockets and title approvals',
+        label: 'DCEC Proposal Review',
+        href: '/app/dcec/screening',
+        allowedRoles: ['HOD', 'DHOD', 'DCEC_MEMBER', 'DCEC_CHAIR'],
+        description: 'Review proposal screening dockets and record binding decisions',
       },
       {
         id: 'dept-allocations',
