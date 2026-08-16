@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { DevPersonaSelector } from '@/components/auth/DevPersonaSelector';
 
 interface LoginPageProps {
   searchParams?: {
@@ -10,15 +10,25 @@ interface LoginPageProps {
 export default function LoginPage({ searchParams }: LoginPageProps) {
   const error = searchParams?.error;
   const redirectTo = searchParams?.redirectTo ?? '/app';
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-      <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '2.5rem 2rem' }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem',
+        backgroundColor: 'var(--bg-main)',
+      }}
+    >
+      <div className="card" style={{ maxWidth: '520px', width: '100%', padding: '2.5rem 2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <span className="badge badge-primary" style={{ marginBottom: '0.75rem' }}>
             Academic Portal
           </span>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             NIET Dissertation Management System
           </h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
@@ -38,14 +48,23 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
               marginBottom: '1.5rem',
             }}
           >
-            Authentication failed: {error}. Please try again or contact the department coordinator.
+            Authentication error: {error}. Please try again or contact your department coordinator.
           </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ backgroundColor: 'var(--primary-light)', padding: '1rem', borderRadius: 'var(--radius)', fontSize: '0.8125rem', color: 'var(--primary)' }}>
+          {/* Institutional SSO Entry Point */}
+          <div
+            style={{
+              backgroundColor: 'var(--primary-light)',
+              padding: '1rem',
+              borderRadius: 'var(--radius)',
+              fontSize: '0.8125rem',
+              color: 'var(--primary)',
+            }}
+          >
             <strong>Institutional Authentication Notice:</strong>
-            <p style={{ marginTop: '0.25rem' }}>
+            <p style={{ marginTop: '0.25rem', color: 'var(--text-main)' }}>
               Sign-in is managed via Microsoft Entra ID (Single Sign-On). Use your registered institutional credentials (@niet.co.in).
             </p>
           </div>
@@ -58,7 +77,19 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
             Sign In with Microsoft Entra ID (SSO)
           </a>
 
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+          {/* Development Persona Selector (Strictly Local Development) */}
+          {isDevelopment && <DevPersonaSelector redirectTo={redirectTo} />}
+
+          <div
+            style={{
+              marginTop: '1.5rem',
+              paddingTop: '1.5rem',
+              borderTop: '1px solid var(--border)',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+            }}
+          >
             Protected by PostgreSQL Row Level Security & RBAC. Unauthorized access is strictly logged and monitored.
           </div>
         </div>
