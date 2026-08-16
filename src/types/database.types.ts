@@ -136,3 +136,4 @@ export * from './annexure2.types';
 export * from './logbook.types';
 export * from './rubrics.types';
 export * from './milestones.types';
+export * from './annexure5.types';

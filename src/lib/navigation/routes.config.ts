@@ -106,6 +106,13 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         description: 'Review and verify Annexure 4 meeting entries',
       },
       {
+        id: 'guide-annexure-5',
+        label: 'Annexure 5 (Submissions)',
+        href: '/app/guide/annexure-5',
+        allowedRoles: ['GUIDE', 'CO_GUIDE', 'FACULTY'],
+        description: 'Review final dissertation manuscripts and Turnitin reports',
+      },
+      {
         id: 'guide-annexure-6',
         label: 'Annexure 6 (Evaluation)',
         href: '/app/guide/annexure-6',
@@ -169,6 +176,13 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         href: '/app/department/milestones',
         allowedRoles: ['HOD', 'DHOD', 'DC', 'DCEC_MEMBER', 'DCEC_CHAIR'],
         description: 'Cohort milestone tracking and performance analytics',
+      },
+      {
+        id: 'dept-annexure-5',
+        label: 'Final Submissions (Annexure 5)',
+        href: '/app/department/annexure-5',
+        allowedRoles: ['HOD', 'DHOD', 'DC', 'DCEC_MEMBER', 'DCEC_CHAIR'],
+        description: 'Cohort final dissertation submissions and similarity tracking',
       },
       {
         id: 'dept-compliance',
