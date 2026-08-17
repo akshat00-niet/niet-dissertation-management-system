@@ -3,8 +3,10 @@ import Link from 'next/link';
 import { requireAuthenticatedUser } from '@/lib/auth/session';
 import { getStudentActiveDissertation } from '@/lib/services/theses.service';
 import { getMilestoneEvaluationDetails } from '@/lib/services/milestones.service';
+import { getDefensePanelDetailsAction } from '@/app/actions/annexure6.actions';
 import { createClient } from '@/lib/supabase/server';
 import { MilestoneTracker } from '@/components/milestones/MilestoneTracker';
+import { DefensePanelCard } from '@/components/annexure6/DefensePanelCard';
 
 export default async function StudentDefensesPage() {
   const session = await requireAuthenticatedUser();
@@ -51,10 +53,15 @@ export default async function StudentDefensesPage() {
     }
   } catch (_err) {}
 
+  // Retrieve defense panel details if panel is constituted / scheduled
+  let panelDetails: any = null;
   try {
-    const resP3 = await getMilestoneEvaluationDetails(supabase, session, { thesis_id: thesis.id, milestone_type: 'P3' });
-    if (resP3.success && resP3.data && typeof resP3.data === 'object' && 'evaluation_id' in resP3.data) {
-      p3Eval = resP3.data;
+    const resPanel = await getDefensePanelDetailsAction({ thesis_id: thesis.id });
+    if (resPanel.success && resPanel.data && typeof resPanel.data === 'object') {
+      const dataObj = resPanel.data as any;
+      if (dataObj.is_constituted) {
+        panelDetails = dataObj;
+      }
     }
   } catch (_err) {}
 
@@ -107,6 +114,17 @@ export default async function StudentDefensesPage() {
           </div>
         </div>
       </div>
+
+      {/* Scheduled Defense Panel Notice */}
+      {panelDetails && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <DefensePanelCard
+            panelDetails={panelDetails}
+            trackingNumber={thesis.tracking_number}
+            studentName={session.appUser?.full_name}
+          />
+        </div>
+      )}
 
       {/* Milestone Progress Tracker */}
       <MilestoneTracker

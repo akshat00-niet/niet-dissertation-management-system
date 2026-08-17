@@ -185,6 +185,20 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
         description: 'Cohort final dissertation submissions and similarity tracking',
       },
       {
+        id: 'dept-annexure-6',
+        label: 'Supervisor Evaluations (Annexure 6)',
+        href: '/app/department/annexure-6',
+        allowedRoles: ['HOD', 'DC', 'DCEC_CHAIR'],
+        description: 'Department Annexure 6 confidential evaluation and panel queue',
+      },
+      {
+        id: 'dept-defense-panels',
+        label: 'Oral Defense Panels',
+        href: '/app/department/defense-panels',
+        allowedRoles: ['HOD', 'DHOD', 'DC', 'DCEC_CHAIR'],
+        description: 'Constitute 2-member examination panels and schedule oral defenses',
+      },
+      {
         id: 'dept-compliance',
         label: 'Department Overview',
         href: '/app/department/compliance',
@@ -203,8 +217,15 @@ export const APP_NAVIGATION_CONFIG: NavSectionConfig[] = [
   {
     id: 'defense-portal',
     title: 'Viva & Evaluation Panels',
-    allowedRoles: ['PANEL_MEMBER', 'DCEC_MEMBER', 'HOD', 'DC'],
+    allowedRoles: ['PANEL_MEMBER', 'DCEC_MEMBER', 'HOD', 'DC', 'FACULTY'],
     items: [
+      {
+        id: 'panel-assignments',
+        label: 'Assigned Viva Defenses',
+        href: '/app/panel/assignments',
+        allowedRoles: ['PANEL_MEMBER', 'FACULTY', 'HOD', 'DC'],
+        description: 'Review assigned oral defense examinations and candidate dossiers',
+      },
       {
         id: 'defense-sessions',
         label: 'Assigned Defense Sessions',
